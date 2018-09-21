@@ -1093,6 +1093,10 @@ public class RserveSession extends Rsession implements RLog {
                 return asList(eval);
             }
 
+            if(eval.isRaw()){
+                return eval.asBytes();
+            }
+
             try {
                 String name = "function_" + (int) Math.floor(1000 * Math.random());
                 synchronized (R) {
@@ -1136,29 +1140,36 @@ public class RserveSession extends Rsession implements RLog {
     public String toString(Object o) {
         //assert o instanceof REXP : "Not an REXP object";
         if (o instanceof REXP) {
+            REXP rexp = (REXP) o;
+
             if (o instanceof REXPNull) {
                 return "NULL";
-            } else if (((REXP) o).isList()) {
+
+            } else if (rexp.isList()) {
                 RList l = ((REXPGenericVector) o).asList();
                 String s = "";
                 for (String k : l.keys()) {
                     s = s + k + ": " + toString(l.get(k)) + "\n";
                 }
                 return s;
-            } else if (((REXP) o).isVector()) {
+            } else if (rexp.isVector()) {
                 try {
-                    String[] ss = ((REXP) o).asStrings();
-                    if (((REXP) o).length() > 10) {
-                        return Arrays.asList(new String[]{ss[0], ss[1], "...(" + ss.length + ")...", ss[ss.length - 2], ss[ss.length - 1]}).toString();
-                    } else {
-                        return Arrays.asList(((REXP) o).asStrings()).toString();
+                    if(rexp.isRaw()){
+                        return "[raw" + rexp.asBytes().length + "]";
+                    }else {
+                        String[] ss = rexp.asStrings();
+                        if (rexp.length() > 10) {
+                            return Arrays.asList(new String[]{ss[0], ss[1], "...(" + ss.length + ")...", ss[ss.length - 2], ss[ss.length - 1]}).toString();
+                        } else {
+                            return Arrays.asList(rexp.asStrings()).toString();
+                        }
                     }
                 } catch (Exception ex) {
                     throw new ClassCastException("[toString] Cannot toString " + o);
                 }
             } else {
                 try {
-                    return ((REXP) o).asString();
+                    return rexp.asString();
                 } catch (Exception ex) {
                     throw new ClassCastException("[toString] Cannot toString " + o);
                 }

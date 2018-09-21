@@ -679,6 +679,19 @@ public class RserveSessionTest {
         }
     }
 
+
+
+    @Test
+    public void testRawResult() throws IOException, Rsession.RException {
+        // this should just run through without throwing an exception.
+//        RserveSession s = RserveSession.newLocalInstance(System.out, null);
+        File testFile = File.createTempFile("rsession_test", ".dat");
+        Object result = s.eval("foo = readBin('" + testFile.getAbsolutePath() + "','raw',2024*2024)");
+
+        assert (result instanceof byte[]) : "Not a byte array";
+    }
+
+
     @Before
     public void setUp() throws Exception {
         RLog l = new RLog() {
@@ -700,7 +713,7 @@ public class RserveSessionTest {
         RserverConf conf = new RserverConf(null, -1, null, null, prop);
         s = RserveSession.newInstanceTry(l, conf);
         System.out.println("| R.version:\t" + s.eval("R.version.string"));
-        System.out.println("| Rserve.version:\t" + s.eval("installed.packages(lib.loc='" + RserveDaemon.app_dir() + "')[\"Rserve\",\"Version\"]"));
+//        System.out.println("| Rserve.version:\t" + s.eval("installed.packages(lib.loc='" + RserveDaemon.app_dir() + "')[\"Rserve\",\"Version\"]"));
 
         System.out.println("| tmpdir:\t" + tmpdir.getAbsolutePath());
         if (!(tmpdir.isDirectory() || tmpdir.mkdir())) {
